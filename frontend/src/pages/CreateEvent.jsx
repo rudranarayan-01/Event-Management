@@ -1,19 +1,43 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Calendar, MapPin, Ticket, Shield, ArrowLeft, Image as ImageIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Calendar, MapPin, Ticket, ArrowLeft, Image as ImageIcon } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react'; // Added Clerk hook
+import axios from 'axios'; // Added Axios for API calls
 
 const CreateEvent = () => {
+    const { user } = useUser(); // Get logged-in manager details
+    const navigate = useNavigate();
     const { register, handleSubmit, formState: { errors } } = useForm();
 
-    const onSubmit = (data) => {
-        console.log("Event Created:", data);
-        // This data will eventually be sent to your SQLite/Node.js backend
+    const onSubmit = async (data) => {
+        // Construct the payload to match your backend POST route
+        const eventPayload = {
+            managerId: user?.id, // Dynamic ID from Clerk
+            title: data.title,
+            description: data.description,
+            location: data.location,
+            dateTime: data.dateTime,
+            privacy: data.privacy,
+            silver: parseInt(data.silver), // Ensure numbers are sent as integers
+            gold: parseInt(data.gold),
+            diamond: parseInt(data.diamond)
+        };
+
+        try {
+            const response = await axios.post('http://localhost:5000/api/events', eventPayload);
+            if (response.status === 201) {
+                alert("Event Published Successfully!");
+                navigate('/dashboard'); // Redirect to manager dashboard
+            }
+        } catch (error) {
+            console.error("Error publishing event:", error);
+            alert("Failed to publish event. Please check if the backend is running.");
+        }
     };
 
     return (
         <div className="min-h-screen bg-black text-white p-6 lg:p-12">
-            {/* Back Button */}
             <Link to="/dashboard" className="inline-flex items-center gap-2 text-gray-500 hover:text-white transition-colors mb-8">
                 <ArrowLeft size={18} />
                 <span className="text-sm font-mono uppercase tracking-widest">Back to Dashboard</span>
@@ -22,7 +46,7 @@ const CreateEvent = () => {
             <div className="max-w-4xl mx-auto">
                 <header className="mb-12">
                     <h1 className="text-4xl font-bold tracking-tighter mb-2">CREATE_NEW_EVENT</h1>
-                    <p className="text-gray-500">Fill in the details below to launch your next experience.</p>
+                    <p className="text-gray-500">Logged in as: <span className="text-white font-mono">{user?.primaryEmailAddress?.emailAddress}</span></p>
                 </header>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-12">
@@ -33,24 +57,22 @@ const CreateEvent = () => {
                             <ImageIcon size={18} />
                             <h2 className="text-xs font-black uppercase tracking-widest">Basic Details</h2>
                         </div>
-
                         <div className="grid grid-cols-1 gap-6">
                             <div className="group">
-                                <label className="block text-xs font-mono text-gray-500 mb-2 group-focus-within:text-white">EVENT TITLE</label>
+                                <label className="block text-xs font-mono text-gray-500 mb-2">EVENT TITLE</label>
                                 <input
                                     {...register("title", { required: true })}
                                     placeholder="e.g. Future Tech Conference 2026"
-                                    className="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl focus:border-white outline-none transition-all placeholder:text-gray-700"
+                                    className="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl focus:border-white outline-none transition-all"
                                 />
                             </div>
-
                             <div className="group">
-                                <label className="block text-xs font-mono text-gray-500 mb-2 group-focus-within:text-white">DESCRIPTION</label>
+                                <label className="block text-xs font-mono text-gray-500 mb-2">DESCRIPTION</label>
                                 <textarea
                                     {...register("description")}
                                     rows="4"
                                     placeholder="What is this event about?"
-                                    className="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl focus:border-white outline-none transition-all placeholder:text-gray-700"
+                                    className="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl focus:border-white outline-none transition-all"
                                 ></textarea>
                             </div>
                         </div>
@@ -62,14 +84,13 @@ const CreateEvent = () => {
                             <MapPin size={18} />
                             <h2 className="text-xs font-black uppercase tracking-widest">Date & Venue</h2>
                         </div>
-
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-xs font-mono text-gray-500 mb-2">DATE & TIME</label>
                                 <input
                                     type="datetime-local"
                                     {...register("dateTime", { required: true })}
-                                    className="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl focus:border-white outline-none transition-all appearance-none"
+                                    className="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl focus:border-white outline-none transition-all"
                                 />
                             </div>
                             <div>
@@ -83,33 +104,50 @@ const CreateEvent = () => {
                         </div>
                     </section>
 
-                    {/* Section 3: Ticketing & Settings */}
+                    {/* Section 3: Tiered Ticketing & Settings */}
                     <section className="space-y-6">
                         <div className="flex items-center gap-2 text-white/50 border-b border-gray-800 pb-2">
                             <Ticket size={18} />
-                            <h2 className="text-xs font-black uppercase tracking-widest">Ticketing & Privacy</h2>
+                            <h2 className="text-xs font-black uppercase tracking-widest">Tiered Pricing (INR)</h2>
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label className="block text-xs font-mono text-gray-500 mb-2">TICKET PRICE (INR)</label>
+                                <label className="block text-xs font-mono text-gray-400 mb-2">SILVER PRICE</label>
                                 <input
                                     type="number"
-                                    {...register("price", { required: true })}
-                                    placeholder="0 for Free"
+                                    {...register("silver", { required: true })}
+                                    placeholder="500"
                                     className="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl focus:border-white outline-none transition-all"
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-mono text-gray-500 mb-2">PRIVACY SETTING</label>
-                                <select
-                                    {...register("privacy")}
+                                <label className="block text-xs font-mono text-gray-300 mb-2 text-yellow-500/80">GOLD PRICE</label>
+                                <input
+                                    type="number"
+                                    {...register("gold", { required: true })}
+                                    placeholder="1500"
                                     className="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl focus:border-white outline-none transition-all"
-                                >
-                                    <option value="public">Public - Searchable</option>
-                                    <option value="private">Private - Invite Only</option>
-                                </select>
+                                />
                             </div>
+                            <div>
+                                <label className="block text-xs font-mono text-gray-200 mb-2 text-blue-400/80">DIAMOND PRICE</label>
+                                <input
+                                    type="number"
+                                    {...register("diamond", { required: true })}
+                                    placeholder="3000"
+                                    className="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl focus:border-white outline-none transition-all"
+                                />
+                            </div>
+                        </div>
+                        <div className="mt-6">
+                            <label className="block text-xs font-mono text-gray-500 mb-2">PRIVACY SETTING</label>
+                            <select
+                                {...register("privacy")}
+                                className="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl focus:border-white outline-none transition-all"
+                            >
+                                <option value="public">Public - Searchable</option>
+                                <option value="private">Private - Invite Only</option>
+                            </select>
                         </div>
                     </section>
 
@@ -117,7 +155,7 @@ const CreateEvent = () => {
                     <div className="pt-8 border-t border-gray-800 flex justify-end">
                         <button
                             type="submit"
-                            className="bg-white text-black px-12 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                            className="bg-white text-black px-12 py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                         >
                             Publish Event
                         </button>
