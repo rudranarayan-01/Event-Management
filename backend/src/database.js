@@ -4,11 +4,7 @@ const path = require('path');
 
 async function setupDb() {
 
-    // DB persistant
-    const isProduction = process.env.NODE_ENV === "production";
-    const dbPath = isProduction
-        ? "/var/data/events.db" // This matches the Render Mount Path
-        : path.join(__dirname, "events.db"); // Local development
+    const dbPath = path.resolve(__dirname, '..', 'events.db');
     db = await open({
         filename: dbPath,
         driver: sqlite3.Database,
