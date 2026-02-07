@@ -6,6 +6,7 @@ import {
   Plus, MapPin, Calendar, Users, 
   Ticket, ArrowUpRight, LayoutGrid, Loader2
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Dashboard = () => {
   const { user } = useUser();
@@ -21,7 +22,7 @@ const Dashboard = () => {
         const response = await axios.get(`http://localhost:5000/api/manager/events/${user.id}`);
         setMyEvents(response.data);
       } catch (error) {
-        console.error("Error fetching manager events:", error);
+        toast.error("Error fetching manager events:", error);
       } finally {
         setLoading(false);
       }

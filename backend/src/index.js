@@ -41,7 +41,8 @@ app.get('/api/events', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-// 2. Fetch events created by LOGGED-IN Manager
+
+// Fetch All the events for Dashboard
 app.get('/api/manager/events/:managerId', async (req, res) => {
     const { managerId } = req.params;
     try {
@@ -61,7 +62,8 @@ app.get('/api/manager/events/:managerId', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-// 3. Create Event
+
+// Create Event
 app.post('/api/events', async (req, res) => {
     const { managerId, title, description, location, dateTime, privacy, silver, gold, diamond } = req.body;
     const id = uuidv4();
@@ -73,7 +75,7 @@ app.post('/api/events', async (req, res) => {
     res.status(201).json({ id, message: "Event Created" });
 });
 
-// 4. Fetch Attendee List for specific Event
+// Fetch Attendee List for specific Event
 app.get('/api/events/:id/attendees', async (req, res) => {
     const { id } = req.params;
     const attendees = await db.all('SELECT * FROM registrations WHERE eventId = ?', [id]);
@@ -82,8 +84,34 @@ app.get('/api/events/:id/attendees', async (req, res) => {
 
 // Get Event Details for Booking Page
 app.get('/api/events/:id', async (req, res) => {
-    const event = await db.get('SELECT * FROM events WHERE id = ?', [req.params.id]);
-    res.json(event);
+    const { id } = req.params;
+    try {
+        const query = `
+            SELECT 
+                e.*,
+                COUNT(r.id) AS totalAttendees,
+                SUM(CASE 
+                    WHEN r.ticketType = 'Silver' THEN e.silver_price 
+                    WHEN r.ticketType = 'Gold' THEN e.gold_price 
+                    WHEN r.ticketType = 'Diamond' THEN e.diamond_price 
+                    ELSE 0 
+                END) AS accumulatedRevenue
+            FROM events e
+            LEFT JOIN registrations r ON e.id = r.eventId
+            WHERE e.id = ?
+            GROUP BY e.id
+        `;
+        const event = await db.get(query, [id]);
+        if (!event) {
+            return res.status(404).json({ error: "Event not found" });
+        }
+        // Handle null revenue for events with 0 bookings
+        event.accumulatedRevenue = event.accumulatedRevenue || 0;
+        res.json(event);
+    } catch (err) {
+        console.error("Database Error:", err.message);
+        res.status(500).json({ error: "Failed to fetch event metrics" });
+    }
 });
 
 // Update Event (For Manager's Control Panel)
