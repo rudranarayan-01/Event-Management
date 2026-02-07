@@ -6,7 +6,7 @@ const EventCard = ({ event }) => {
     const navigate = useNavigate();
 
     return (
-        <div className="group relative bg-gray-900/40 border border-gray-800 p-6 rounded-[2rem] hover:border-white transition-all duration-500 cursor-pointer overflow-hidden">
+        <div className="group relative bg-gray-900/40 border border-gray-800 p-6 rounded-4xl hover:border-white transition-all duration-500 cursor-pointer overflow-hidden">
             {/* Visual Accent */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl rounded-full -mr-10 -mt-10 group-hover:bg-white/10 transition-all" />
 
@@ -18,7 +18,7 @@ const EventCard = ({ event }) => {
                     <ArrowUpRight className="text-gray-600 group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" size={20} />
                 </div>
 
-                <h3 className="text-2xl font-bold text-white mb-2 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-500 transition-all">
+                <h3 className="text-2xl font-bold text-white mb-2 leading-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-white group-hover:to-gray-500 transition-all">
                     {event.title}
                 </h3>
 

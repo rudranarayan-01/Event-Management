@@ -12,7 +12,6 @@ let db;
 setupDb().then(database => db = database);
 
 // --- ROUTES ---
-
 app.get('/api/health', (req, res) => {
     res.json({ status: "Backend is running", timestamp: new Date() });
 });
@@ -230,5 +229,5 @@ app.post('/api/events/:id/broadcast', async (req, res) => {
     }
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT||5000;
 app.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));

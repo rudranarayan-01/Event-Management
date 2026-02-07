@@ -1,13 +1,19 @@
-const sqlite3 = require('sqlite3');
-const { open } = require('sqlite');
+const sqlite3 = require("sqlite3");
+const { open } = require("sqlite");
 
 async function setupDb() {
+
+    // DB persistant
+    const isProduction = process.env.NODE_ENV === "production";
+    const dbPath = isProduction
+        ? "/var/data/events.db" // This matches the Render Mount Path
+        : path.join(__dirname, "events.db"); // Local development
     db = await open({
-        filename: './events.db',
-        driver: sqlite3.Database
+        filename: dbPath,
+        driver: sqlite3.Database,
     });
 
-    // 1. Create Users Table (Essential for Joins)
+    // 1. Users Table (Essential for Joins mainly for Conversation and all)
     await db.exec(`
         CREATE TABLE IF NOT EXISTS users (
             clerkId TEXT PRIMARY KEY,
@@ -17,8 +23,8 @@ async function setupDb() {
         )
     `);
 
-    // 2. Create Events Table
-    await db.exec(`
+  // 2. Events Table
+  await db.exec(`
         CREATE TABLE IF NOT EXISTS events (
             id TEXT PRIMARY KEY,
             managerId TEXT,
@@ -33,8 +39,8 @@ async function setupDb() {
         )
     `);
 
-    // 3. Create Registrations Table
-    await db.exec(`
+  // 3. Create Registrations Table
+  await db.exec(`
         CREATE TABLE IF NOT EXISTS registrations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             eventId TEXT,
@@ -48,8 +54,8 @@ async function setupDb() {
         )
     `);
 
-    // 4. Create Engagement Table
-    await db.exec(`
+  // 4. Create Engagement Table
+  await db.exec(`
         CREATE TABLE IF NOT EXISTS engagement (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             eventId TEXT,
@@ -62,8 +68,8 @@ async function setupDb() {
         )
     `);
 
-    console.log("✅ Database tables (including 'users') are ready.");
-    return db;
+  console.log(`📡 Database connected at: ${dbPath}`);
+  return db;
 }
 
 module.exports = setupDb;
