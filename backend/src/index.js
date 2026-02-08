@@ -5,24 +5,17 @@ const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
 
 const app = express();
-const cors = require('cors');
+const cors = require("cors")
 
-const allowedOrigins = [
-  'http://localhost:5173', // Vite default
-  'http://localhost:3000', // React default
-  'https://your-deployed-frontend.vercel.app'
-];
-
+// CORS configuration for local and production
+const allowedOrigins = ['http://localhost:5173', 'https://your-frontend.onrender.com'];
 app.use(cors({
-    origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-        return callback(new Error('CORS policy violation'), false);
-    }
-    return callback(null, true);
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+        else callback(new Error('Not allowed by CORS'));
     }
 }));
+
 
 app.use(express.json());
 

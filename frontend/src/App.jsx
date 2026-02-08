@@ -6,7 +6,7 @@ import Navbar from './components/Navbar';
 import { AuthPage } from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Home from './pages/Home';
-import CreateEvent from './Pages/CreateEvent';
+import CreateEvent from './pages/CreateEvent';
 import EventControlPannel from './pages/EventControlPannel';
 import EventDetails from './pages/BookingPage';
 
