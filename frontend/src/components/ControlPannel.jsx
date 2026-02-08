@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
 import {
   Users, Ticket, Bell, Settings, Search,
   Mail, Download, Zap, ArrowLeft, X, Loader2
@@ -180,7 +179,7 @@ const CommTab = ({ eventId, eventTitle }) => {
 
     setSending(true);
     try {
-      await axios.post(`http://localhost:5000/api/events/${eventId}/broadcast`, {
+      await api.post(`/events/${eventId}/broadcast`, {
         message,
         eventTitle
       });
