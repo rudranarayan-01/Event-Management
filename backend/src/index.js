@@ -5,10 +5,9 @@ const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
 
 const app = express();
-const cors = require("cors")
 
 // CORS configuration for local and production
-const allowedOrigins = ['http://localhost:5173', 'https://your-frontend.onrender.com'];
+const allowedOrigins = ['http://localhost:5173', 'https://evently-yebc.onrender.com'];
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) callback(null, true);
