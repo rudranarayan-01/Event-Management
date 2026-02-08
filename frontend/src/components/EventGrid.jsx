@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import EventCard from './EventCard';
 import { Search, ArrowRight, Loader2 } from 'lucide-react';
-import axios from 'axios';
+import api from '../../api/api';
 
 const EventGrid = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -12,7 +12,7 @@ const EventGrid = () => {
         const fetchAllEvents = async () => {
             try {
                 // Fetching all events available on the platform
-                const res = await axios.get('http://localhost:5000/api/events');
+                const res = await api.get('/api/events');
                 setEvents(res.data);
             } catch (err) {
                 console.error("Error fetching platform events:", err);

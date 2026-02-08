@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import EditModal from './EditModal';
 import { toast } from 'sonner';
+import api from '../../api/api';
 
 const EventControlPanel = () => {
   const { id } = useParams();
@@ -21,11 +22,11 @@ const EventControlPanel = () => {
   useEffect(() => {
     const fetchEventDetails = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/events/${id}`);
+        const res = await api.get(`/events/${id}`);
         setEventData(res.data);
 
         // Fetch Attendees 
-        const attendeeRes = await axios.get(`http://localhost:5000/api/events/${id}/attendees`);
+        const attendeeRes = await api.get(`/events/${id}/attendees`);
         setAttendees(attendeeRes.data);
       } catch (err) {
         console.error("Fetch Error:", err);

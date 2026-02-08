@@ -7,6 +7,7 @@ import {
   Ticket, ArrowUpRight, LayoutGrid, Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import api from '../../api/api';
 
 const Dashboard = () => {
   const { user } = useUser();
@@ -19,7 +20,7 @@ const Dashboard = () => {
       
       try {
         // Fetching events where managerId matches the logged-in Clerk user ID
-        const response = await axios.get(`http://localhost:5000/api/manager/events/${user.id}`);
+        const response = await api.get(`/manager/events/${user.id}`);
         setMyEvents(response.data);
       } catch (error) {
         toast.error("Error fetching manager events:", error);
@@ -128,7 +129,7 @@ const Dashboard = () => {
                 </div>
                 
                 {/* Progress Bar */}
-                <div className="mt-8 w-full bg-gray-800 h-[2px] rounded-full overflow-hidden">
+                <div className="mt-8 w-full bg-gray-800 h-0.5 rounded-full overflow-hidden">
                   <div 
                     className="bg-white h-full transition-all duration-1000 group-hover:bg-green-500" 
                     style={{ width: `${(totalBookings / totalCapacity) * 100}%` }}

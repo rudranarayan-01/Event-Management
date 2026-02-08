@@ -1,17 +1,16 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Calendar, MapPin, Ticket, ArrowLeft, Image as ImageIcon } from 'lucide-react';
+import {  MapPin, Ticket, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react'; // Added Clerk hook
-import axios from 'axios'; // Added Axios for API calls
+import { useUser } from '@clerk/clerk-react'; 
+import api from '../../api/api';
 
 const CreateEvent = () => {
-    const { user } = useUser(); // Get logged-in manager details
+    const { user } = useUser(); 
     const navigate = useNavigate();
     const { register, handleSubmit, formState: { errors } } = useForm();
 
     const onSubmit = async (data) => {
-        // Construct the payload to match your backend POST route
         const eventPayload = {
             managerId: user?.id, // Dynamic ID from Clerk
             title: data.title,
@@ -19,13 +18,13 @@ const CreateEvent = () => {
             location: data.location,
             dateTime: data.dateTime,
             privacy: data.privacy,
-            silver: parseInt(data.silver), // Ensure numbers are sent as integers
+            silver: parseInt(data.silver), 
             gold: parseInt(data.gold),
             diamond: parseInt(data.diamond)
         };
 
         try {
-            const response = await axios.post('http://localhost:5000/api/events', eventPayload);
+            const response = await api.post('/events', eventPayload);
             if (response.status === 201) {
                 alert("Event Published Successfully!");
                 navigate('/dashboard'); // Redirect to manager dashboard
@@ -121,7 +120,7 @@ const CreateEvent = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-mono text-gray-300 mb-2 text-yellow-500/80">GOLD PRICE</label>
+                                <label className="block text-xs font-mono text-gray-300 mb-2">GOLD PRICE</label>
                                 <input
                                     type="number"
                                     {...register("gold", { required: true })}
@@ -130,7 +129,7 @@ const CreateEvent = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-mono text-gray-200 mb-2 text-blue-400/80">DIAMOND PRICE</label>
+                                <label className="block text-xs font-mono mb-2 text-blue-400/80">DIAMOND PRICE</label>
                                 <input
                                     type="number"
                                     {...register("diamond", { required: true })}
