@@ -175,12 +175,12 @@ const CommTab = ({ eventId, eventTitle }) => {
   const handleBroadcast = async () => {
     if (!message.trim()) {
       toast.error("Please enter a message.")
+      return
     }
-
     setSending(true);
     try {
       await api.post(`/events/${eventId}/broadcast`, {
-        message,
+        message:message,
         eventTitle
       });
       toast.success('Broadcast Successful', {
@@ -193,7 +193,9 @@ const CommTab = ({ eventId, eventTitle }) => {
       });
       setMessage("");
     } catch (err) {
-      toast.error("Error sending broadcast. Check backend logs.");
+      const errorMessage = err.response?.data?.error || err.message;
+      toast.error(`Broadcast Failed: ${errorMessage}`);
+      console.error(err);
     } finally {
       setSending(false);
     }
@@ -235,14 +237,12 @@ const CommTab = ({ eventId, eventTitle }) => {
 /* --- STAT BOX COMPONENT --- */
 
 const StatBox = ({ label, value, change, isHighlight }) => (
-  <div className={`p-5 rounded-2xl border ${
-    isHighlight 
-    ? 'bg-white text-black border-white shadow-[0_0_30px_rgba(255,255,255,0.15)]' 
-    : 'bg-gray-900/30 border-gray-800 text-white'
-  }`}>
-    <p className={`text-[9px] font-mono uppercase tracking-widest mb-2 ${
-      isHighlight ? 'text-black/60' : 'text-gray-500'
-    }`}>{label}</p>
+  <div className={`p-5 rounded-2xl border ${isHighlight
+      ? 'bg-white text-black border-white shadow-[0_0_30px_rgba(255,255,255,0.15)]'
+      : 'bg-gray-900/30 border-gray-800 text-white'
+    }`}>
+    <p className={`text-[9px] font-mono uppercase tracking-widest mb-2 ${isHighlight ? 'text-black/60' : 'text-gray-500'
+      }`}>{label}</p>
     <div className="flex items-end justify-between">
       <p className="text-2xl font-black tracking-tighter">{value}</p>
       <span className={`text-[10px] font-mono ${isHighlight ? 'text-green-600' : 'text-green-500'}`}>
