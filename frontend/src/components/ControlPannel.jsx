@@ -79,7 +79,7 @@ const EventControlPanel = () => {
               }`}
           >
             {tab}
-            {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-[2px] bg-white animate-in slide-in-from-left" />}
+            {activeTab === tab && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-white animate-in slide-in-from-left" />}
           </button>
         ))}
       </div>
@@ -212,7 +212,7 @@ const CommTab = ({ eventId, eventTitle }) => {
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="w-full bg-black border border-gray-800 p-4 rounded-2xl mb-4 focus:border-white outline-none transition-all min-h-[150px] text-sm"
+          className="w-full bg-black border border-gray-800 p-4 rounded-2xl mb-4 focus:border-white outline-none transition-all min-h-37.5 text-sm"
           placeholder="Write your update here..."
         />
         <button

@@ -1,8 +1,8 @@
 // components/DiscussionForum.jsx
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useUser } from '@clerk/clerk-react';
 import { MessageSquare, Send, AlertCircle } from 'lucide-react';
+import api from '../../api/api';
 
 const DiscussionForum = ({ eventId }) => {
     const { user } = useUser();
@@ -10,19 +10,18 @@ const DiscussionForum = ({ eventId }) => {
     const [newPost, setNewPost] = useState("");
     const [isSynced, setIsSynced] = useState(false);
 
-    // 1. Sync User to DB (Crucial for Foreign Key)
     useEffect(() => {
         const syncUser = async () => {
             if (user) {
                 try {
-                    await axios.post("http://localhost:5000/api/users/sync", {
+                    await api.post("/users/sync", {
                         clerkId: user.id,
                         fullName: user.fullName,
                         email: user.primaryEmailAddress.emailAddress,
                         profileImageUrl: user.imageUrl
                     });
                     setIsSynced(true);
-                    fetchPosts(); // Fetch posts only after we know the user is synced
+                    fetchPosts();
                 } catch (err) {
                     console.error("User sync failed", err);
                 }
@@ -33,7 +32,7 @@ const DiscussionForum = ({ eventId }) => {
 
     const fetchPosts = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/events/${eventId}/discussions`);
+            const res = await api.get(`/events/${eventId}/discussions`);
             setPosts(res.data);
         } catch (err) { console.error("Forum fetch error", err); }
     };
@@ -42,7 +41,7 @@ const DiscussionForum = ({ eventId }) => {
         if (!newPost.trim() || !user || !isSynced) return;
         
         try {
-            await axios.post('http://localhost:5000/api/engagement', {
+            await api.post('/engagement', {
                 eventId,
                 userId: user.id,
                 type: 'question',
@@ -93,7 +92,7 @@ const DiscussionForum = ({ eventId }) => {
             )}
 
             {/* Posts Stream */}
-            <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-6 max-h-125 overflow-y-auto pr-2 custom-scrollbar">
                 {posts.length > 0 ? posts.map((post) => (
                     <div key={post.id} className="flex gap-4 group animate-in fade-in slide-in-from-bottom-2">
                         <img 

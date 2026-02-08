@@ -1,17 +1,15 @@
 import React from 'react'
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
 import { X } from 'lucide-react';
+import api from '../../api/api';
 
 const EditModal = ({ event, close, refresh }) => {
     const { register, handleSubmit } = useForm({ defaultValues: event });
 
     const onUpdate = async (data) => {
         try {
-            // Send the updated title, location, description, AND dateTime to the backend
-            await axios.put(`http://localhost:5000/api/events/${event.id}`, data);
+            await api.put(`/events/${event.id}`, data);
 
-            // Update the local UI state immediately
             refresh(data);
             close();
         } catch (err) {
@@ -20,7 +18,7 @@ const EditModal = ({ event, close, refresh }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 backdrop-blur-sm">
             <div className="bg-gray-900 border border-gray-800 w-full max-w-lg rounded-3xl p-8 animate-in zoom-in-95">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-black uppercase tracking-tighter italic">Update_Event</h2>

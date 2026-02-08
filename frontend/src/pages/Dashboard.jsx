@@ -19,7 +19,6 @@ const Dashboard = () => {
       if (!user) return;
       
       try {
-        // Fetching events where managerId matches the logged-in Clerk user ID
         const response = await api.get(`/manager/events/${user.id}`);
         setMyEvents(response.data);
       } catch (error) {

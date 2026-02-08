@@ -6,6 +6,7 @@ import { Calendar, MapPin, ShieldCheck, Zap, ArrowLeft, Loader2, CheckCircle2 } 
 import TierCard from '../components/TierCard';
 import DiscussionForum from '../components/Discussion';
 import { toast } from 'sonner';
+import api from '../../api/api';
 
 const BookingPage = () => {
     const { id } = useParams();
@@ -19,7 +20,7 @@ const BookingPage = () => {
     useEffect(() => {
         const fetchEventData = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/events/${id}`);
+                const res = await api.get(`/events/${id}`);
                 setEvent(res.data);
             } catch (err) {
                 toast.error("Booking fetch error:", err);
@@ -45,7 +46,7 @@ const BookingPage = () => {
         };
 
         try {
-            await axios.post('http://localhost:5000/api/registrations', bookingData);
+            await api.post('/registrations', bookingData);
             toast.success('RESERVATION_CONFIRMED', {
                 description: `Your ${selectedTier} ticket is secured for ${event.title}.`,
                 style: {

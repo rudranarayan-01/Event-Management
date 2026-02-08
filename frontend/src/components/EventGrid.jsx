@@ -12,7 +12,7 @@ const EventGrid = () => {
         const fetchAllEvents = async () => {
             try {
                 // Fetching all events available on the platform
-                const res = await api.get('/api/events');
+                const res = await api.get('/events');
                 setEvents(res.data);
             } catch (err) {
                 console.error("Error fetching platform events:", err);

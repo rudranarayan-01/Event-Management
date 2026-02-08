@@ -27,7 +27,7 @@ const CreateEvent = () => {
             const response = await api.post('/events', eventPayload);
             if (response.status === 201) {
                 alert("Event Published Successfully!");
-                navigate('/dashboard'); // Redirect to manager dashboard
+                navigate('/dashboard');
             }
         } catch (error) {
             console.error("Error publishing event:", error);
