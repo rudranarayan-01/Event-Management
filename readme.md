@@ -12,7 +12,7 @@ I chose these specific tools because they work well together for a fast, modern 
 
 ## Key Features
 ### The Public Grid
-    Users can see a list of all upcoming events. I wrote the code to automatically hide events that have already finished, so the platform always looks fresh and updated.
+Users can see a list of all upcoming events. I wrote the code to automatically hide events that have already finished, so the platform always looks fresh and updated, and can be able to discuss about other for a specific event.
 
 ### The Manager Control Panel
 This contains primary functionalities of the app. If we created an event, we get access to a special dashboard where we can:
