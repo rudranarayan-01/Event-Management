@@ -32,4 +32,6 @@ Initially, when sending broadcast emails, the screen would freeze while the serv
 ## Conclusion
 This project isn't just a list of events; it's a tool for communication. It taught me how to handle real-world problems like data synchronization, email delivery, and creating a UI that people actually enjoy looking at.
 
+
 Live Link: https://evently-yebc.onrender.com/
+This is deployed in render(separate frontend and backend) with a free instance so it may take time to wakeup backend server.
