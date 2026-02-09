@@ -1,5 +1,5 @@
 # Evently: Event Manager 
-Evently is a full-stack web application designed to help people create, discover, and manage events. The goal was to build a clean, fast "Command Center" where event organizers can see exactly how their events are performing, while users get a smooth experience finding and booking tickets.
+Evently is a full-stack web application designed to help people create, discover, and manage events. The goal was to build a clean, fast Event management platform where event organizers can see exactly how their events are performing, while users get a smooth experience finding and booking tickets.
 
 ## Tech Stack:
 I chose these specific tools because they work well together for a fast, modern app:
@@ -12,7 +12,7 @@ I chose these specific tools because they work well together for a fast, modern 
 
 ## Key Features
 ### The Public Grid
-    Users can see a list of all upcoming events. I wrote the code to automatically hide events that have already finished, so the platform always looks fresh and updated.
+Users can see a list of all upcoming events. I wrote the code to automatically hide events that have already finished, so the platform always looks fresh and updated, and can be able to discuss about other for a specific event.
 
 ### The Manager Control Panel
 This contains primary functionalities of the app. If we created an event, we get access to a special dashboard where we can:
@@ -31,3 +31,8 @@ Initially, when sending broadcast emails, the screen would freeze while the serv
 
 ## Conclusion
 This project isn't just a list of events; it's a tool for communication. It taught me how to handle real-world problems like data synchronization, email delivery, and creating a UI that people actually enjoy looking at.
+
+
+Live Link: https://evently-yebc.onrender.com/
+
+This is deployed in render(separate frontend and backend) with a free instance so it may take time to wakeup backend server.
