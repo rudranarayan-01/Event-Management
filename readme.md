@@ -3,7 +3,6 @@ Evently is a full-stack web application designed to help people create, discover
 
 ## Tech Stack:
 I chose these specific tools because they work well together for a fast, modern app:
-
 - Frontend: React with Vite (for speed) and Tailwind CSS (for the "Glassmorphism" look).
 - Icons: Lucide-React for those sharp, consistent UI elements.
 - Backend: Node.js and Express. It’s lightweight and handles many requests easily.
