@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import {
   Users, Ticket, Bell, Settings, Search,
-  Mail, Download, Zap, ArrowLeft, X, Loader2
+  Mail, Download, Zap, ArrowLeft, X, Loader2,
+  Trash2
 } from 'lucide-react';
 import EditModal from './EditModal';
 import { toast } from 'sonner';
@@ -16,6 +17,35 @@ const EventControlPanel = () => {
   const [loading, setLoading] = useState(true);
   const [eventData, setEventData] = useState(null);
   const [attendees, setAttendees] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleDelete = async (eventId) => {
+    // Validation check
+    if (!eventId) {
+      toast.error("Invalid Event ID");
+      return;
+    }
+    // Safety Confirmation
+    const confirmDelete = window.confirm(
+      "⚠️ Warning: This will permanently delete the event and all attendee records. Continue?"
+    );
+    if (!confirmDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await api.delete(`/events/${eventId}`);
+      toast.success("Event successfully deleted");
+      navigate('/dashboard', { replace: true });
+
+    } catch (err) {
+      console.error("Delete Error:", err.response?.data || err.message);
+      toast.error(err.response?.data?.message || "Failed to delete event");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
 
   // Fetch Event Details & Attendees on Load
   useEffect(() => {
@@ -59,6 +89,25 @@ const EventControlPanel = () => {
           >
             <Settings size={14} /> Edit Event
           </button>
+
+          {/* Delete Button  */}
+          <button
+            onClick={() => handleDelete(id)}
+            disabled={isDeleting}
+            className="flex items-center gap-2 px-6 py-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500 hover:text-white transition-all font-bold uppercase tracking-tighter text-xs"
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <Trash2 size={16} />
+                Delete Event
+              </>
+            )}
+          </button>
         </div>
       </div>
 
@@ -87,7 +136,7 @@ const EventControlPanel = () => {
       <div className="space-y-8">
         {activeTab === 'overview' && <OverviewTab event={eventData} attendeeCount={attendees.length} />}
         {activeTab === 'attendees' && <AttendeeTab attendees={attendees} />}
-        {activeTab === 'communications' && <CommTab eventId={id} />}
+        {activeTab === 'communications' && <CommTab eventId={id} eventTitle={eventData?.title} />}
       </div>
 
       {/* 5. EDIT MODAL */}
@@ -168,34 +217,24 @@ const AttendeeTab = ({ attendees }) => (
   </div>
 );
 
+import axios from 'axios';
 const CommTab = ({ eventId, eventTitle }) => {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
-
   const handleBroadcast = async () => {
-    if (!message.trim()) {
-      toast.error("Please enter a message.")
-      return
-    }
+    if (!message.trim()) return toast.error("Please enter a message.");
+
     setSending(true);
     try {
-      await api.post(`/events/${eventId}/broadcast`, {
-        message:message,
+      await axios.post(`http://localhost:5000/api/events/${eventId}/broadcast`, {
+        message,
         eventTitle
       });
-      toast.success('Broadcast Successful', {
-        style: {
-          background: '#000',
-          color: '#fff',
-          border: '1px solid #333',
-          fontFamily: 'monospace'
-        },
-      });
+      toast.success("Broadcast successful!");
       setMessage("");
     } catch (err) {
-      const errorMessage = err.response?.data?.error || err.message;
-      toast.error(`Broadcast Failed: ${errorMessage}`);
-      console.error(err);
+      toast.error("Error sending broadcast. Check backend logs.");
+      console.log(err)
     } finally {
       setSending(false);
     }
@@ -213,7 +252,7 @@ const CommTab = ({ eventId, eventTitle }) => {
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="w-full bg-black border border-gray-800 p-4 rounded-2xl mb-4 focus:border-white outline-none transition-all min-h-37.5 text-sm"
+          className="w-full bg-black border border-gray-800 p-4 rounded-2xl mb-4 focus:border-white outline-none transition-all min-h-[150px] text-sm"
           placeholder="Write your update here..."
         />
         <button
@@ -238,8 +277,8 @@ const CommTab = ({ eventId, eventTitle }) => {
 
 const StatBox = ({ label, value, change, isHighlight }) => (
   <div className={`p-5 rounded-2xl border ${isHighlight
-      ? 'bg-white text-black border-white shadow-[0_0_30px_rgba(255,255,255,0.15)]'
-      : 'bg-gray-900/30 border-gray-800 text-white'
+    ? 'bg-white text-black border-white shadow-[0_0_30px_rgba(255,255,255,0.15)]'
+    : 'bg-gray-900/30 border-gray-800 text-white'
     }`}>
     <p className={`text-[9px] font-mono uppercase tracking-widest mb-2 ${isHighlight ? 'text-black/60' : 'text-gray-500'
       }`}>{label}</p>

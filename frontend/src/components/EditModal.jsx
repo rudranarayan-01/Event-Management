@@ -9,7 +9,6 @@ const EditModal = ({ event, close, refresh }) => {
     const onUpdate = async (data) => {
         try {
             await api.put(`/events/${event.id}`, data);
-
             refresh(data);
             close();
         } catch (err) {

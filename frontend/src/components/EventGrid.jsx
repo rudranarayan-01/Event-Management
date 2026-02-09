@@ -11,9 +11,12 @@ const EventGrid = () => {
     useEffect(() => {
         const fetchAllEvents = async () => {
             try {
-                // Fetching all events available on the platform
                 const res = await api.get('/events');
-                setEvents(res.data);
+
+                const now = new Date();
+                const filtered = res.data.filter(event => new Date(event.dateTime) >= now);
+
+                setEvents(filtered);
             } catch (err) {
                 console.error("Error fetching platform events:", err);
             } finally {

@@ -41,17 +41,22 @@ app.post('/api/users/sync', async (req, res) => {
 });
 
 // 1. Fetch ALL events (For Discovery/Home)
-app.get('/api/events', async (req, res) => {
+app.get("/api/events", async (req, res) => {
     try {
-        // Fetch all events for the public grid
-        const events = await db.all('SELECT * FROM events');
+        // Fetch future events and sort by date and time
+        const events = await db.all(`
+            SELECT * FROM events 
+            WHERE dateTime >= datetime('now', 'localtime') 
+            ORDER BY dateTime ASC
+        `);
+        
         res.json(events);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Fetch All the events for Dashboard
+// Fetch All the events for mangers Dashboard
 app.get('/api/manager/events/:managerId', async (req, res) => {
     const { managerId } = req.params;
     try {
@@ -125,10 +130,10 @@ app.get('/api/events/:id', async (req, res) => {
 
 // Update Event (For Manager's Control Panel)
 app.put('/api/events/:id', async (req, res) => {
-    const { title, location, description } = req.body;
+    const { title, location, description, dateTime } = req.body;
     await db.run(
-        'UPDATE events SET title = ?, location = ?, description = ? WHERE id = ?',
-        [title, location, description, req.params.id]
+        'UPDATE events SET title = ?, location = ?, description = ?, dateTime = ? WHERE id = ?',
+        [title, location, description, dateTime, req.params.id]
     );
     res.json({ message: "Updated" });
 });
@@ -235,6 +240,43 @@ app.post('/api/events/:id/broadcast', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Failed to send broadcast" });
+    }
+});
+
+
+// DELETE an event by ID
+app.delete("/api/events/:id", async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // 1. Check if the event exists
+        const event = await db.get("SELECT * FROM events WHERE id = ?", [id]);
+        
+        if (!event) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Event not found" 
+            });
+        }
+
+        // 2. Delete associated registrations first (to prevent orphan data)
+        await db.run("DELETE FROM registrations WHERE eventId = ?", [id]);
+
+        // 3. Delete the actual event
+        await db.run("DELETE FROM events WHERE id = ?", [id]);
+        console.log(`🗑️ Successfully deleted event: ${id}`);
+        
+        res.status(200).json({ 
+            success: true, 
+            message: "Event and all associated bookings deleted." 
+        });
+
+    } catch (err) {
+        console.error("Database Delete Error:", err.message);
+        res.status(500).json({ 
+            success: false, 
+            message: "Internal Server Error during deletion." 
+        });
     }
 });
 

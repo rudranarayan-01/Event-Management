@@ -4,6 +4,7 @@ import {  MapPin, Ticket, ArrowLeft, Image as ImageIcon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react'; 
 import api from '../../api/api';
+import { toast } from 'sonner';
 
 const CreateEvent = () => {
     const { user } = useUser(); 
@@ -26,12 +27,12 @@ const CreateEvent = () => {
         try {
             const response = await api.post('/events', eventPayload);
             if (response.status === 201) {
-                alert("Event Published Successfully!");
+                toast.success("Event Published Successfully!");
                 navigate('/dashboard');
             }
         } catch (error) {
             console.error("Error publishing event:", error);
-            alert("Failed to publish event. Please check if the backend is running.");
+            toast.error("Failed to publish event. Please check if the backend is running.");
         }
     };
 
@@ -137,16 +138,6 @@ const CreateEvent = () => {
                                     className="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl focus:border-white outline-none transition-all"
                                 />
                             </div>
-                        </div>
-                        <div className="mt-6">
-                            <label className="block text-xs font-mono text-gray-500 mb-2">PRIVACY SETTING</label>
-                            <select
-                                {...register("privacy")}
-                                className="w-full bg-gray-900 border border-gray-800 p-4 rounded-xl focus:border-white outline-none transition-all"
-                            >
-                                <option value="public">Public - Searchable</option>
-                                <option value="private">Private - Invite Only</option>
-                            </select>
                         </div>
                     </section>
 
