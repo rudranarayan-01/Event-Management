@@ -34,4 +34,5 @@ This project isn't just a list of events; it's a tool for communication. It taug
 
 
 Live Link: https://evently-yebc.onrender.com/
+
 This is deployed in render(separate frontend and backend) with a free instance so it may take time to wakeup backend server.
