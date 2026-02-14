@@ -21,14 +21,12 @@ const EventControlPanel = () => {
   const navigate = useNavigate();
   
   const handleDelete = async (eventId) => {
-    // Validation check
     if (!eventId) {
       toast.error("Invalid Event ID");
       return;
     }
-    // Safety Confirmation
     const confirmDelete = window.confirm(
-      "⚠️ Warning: This will permanently delete the event and all attendee records. Continue?"
+      " Warning: This will permanently delete the event and all attendee records. Continue?"
     );
     if (!confirmDelete) return;
 
@@ -37,7 +35,6 @@ const EventControlPanel = () => {
       await api.delete(`/events/${eventId}`);
       toast.success("Event successfully deleted");
       navigate('/dashboard', { replace: true });
-
     } catch (err) {
       console.error("Delete Error:", err.response?.data || err.message);
       toast.error(err.response?.data?.message || "Failed to delete event");
@@ -66,6 +63,8 @@ const EventControlPanel = () => {
     fetchEventDetails();
   }, [id]);
 
+
+  
   if (loading) return (
     <div className="h-screen bg-black flex flex-col items-center justify-center text-gray-500">
       <Loader2 className="animate-spin mb-4" />
@@ -221,12 +220,13 @@ import axios from 'axios';
 const CommTab = ({ eventId, eventTitle }) => {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  
   const handleBroadcast = async () => {
     if (!message.trim()) return toast.error("Please enter a message.");
 
     setSending(true);
     try {
-      await axios.post(`http://localhost:5000/api/events/${eventId}/broadcast`, {
+      await api.post(`/events/${eventId}/broadcast`, {
         message,
         eventTitle
       });
@@ -252,7 +252,7 @@ const CommTab = ({ eventId, eventTitle }) => {
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="w-full bg-black border border-gray-800 p-4 rounded-2xl mb-4 focus:border-white outline-none transition-all min-h-[150px] text-sm"
+          className="w-full bg-black border border-gray-800 p-4 rounded-2xl mb-4 focus:border-white outline-none transition-all min-h-37.5 text-sm"
           placeholder="Write your update here..."
         />
         <button

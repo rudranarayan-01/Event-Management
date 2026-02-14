@@ -8,23 +8,22 @@ const EventGrid = () => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchAllEvents = async () => {
+    useEffect(()=>{
+        const fetchEvents = async() =>{
+            setLoading(true)
             try {
                 const res = await api.get('/events');
-
-                const now = new Date();
-                const filtered = res.data.filter(event => new Date(event.dateTime) >= now);
-
-                setEvents(filtered);
-            } catch (err) {
-                console.error("Error fetching platform events:", err);
-            } finally {
-                setLoading(false);
+                const now = new Date()
+                const filtered = res.data.filter(event => new Date(event.dateTime) >= now)
+                setEvents(filtered)
+            } catch (error) {
+                console.log(error)
             }
-        };
-        fetchAllEvents();
-    }, []);
+            setLoading(false)
+        }
+        fetchEvents();
+    },[])
+
 
     return (
         <div className="py-10">

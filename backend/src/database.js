@@ -21,7 +21,7 @@ async function setupDb() {
     `);
 
   // 2. Events Table
-  await db.exec(`
+    await db.exec(`
         CREATE TABLE IF NOT EXISTS events (
             id TEXT PRIMARY KEY,
             managerId TEXT,
@@ -36,8 +36,8 @@ async function setupDb() {
         )
     `);
 
-  // 3. Create Registrations Table
-  await db.exec(`
+  // 3. Registrations Table
+    await db.exec(`
         CREATE TABLE IF NOT EXISTS registrations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             eventId TEXT,
@@ -51,8 +51,8 @@ async function setupDb() {
         )
     `);
 
-  // 4. Create Engagement Table
-  await db.exec(`
+  // 4. Engagement Table
+    await db.exec(`
         CREATE TABLE IF NOT EXISTS engagement (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             eventId TEXT,
@@ -60,13 +60,14 @@ async function setupDb() {
             type TEXT, 
             content TEXT,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            
             FOREIGN KEY (eventId) REFERENCES events (id),
             FOREIGN KEY (userId) REFERENCES users (clerkId)
         )
     `);
 
-  console.log(`📡 Database connected at: ${dbPath}`);
-  return db;
+    console.log(`📡 Database connected at: ${dbPath}`);
+    return db;
 }
 
 module.exports = setupDb;

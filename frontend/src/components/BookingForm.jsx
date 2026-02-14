@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
-import axios from 'axios';
 import { Calendar, MapPin, ShieldCheck, Zap, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 import TierCard from '../components/TierCard';
 import DiscussionForum from '../components/Discussion';
@@ -12,7 +11,6 @@ const BookingPage = () => {
     const { id } = useParams();
     const { user } = useUser();
     const navigate = useNavigate();
-
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedTier, setSelectedTier] = useState('Silver');
@@ -35,7 +33,6 @@ const BookingPage = () => {
         if (!user){
             toast.error("Sign in to continue")
         }
-
         const bookingData = {
             eventId: id,
             userId: user.id,
@@ -44,10 +41,9 @@ const BookingPage = () => {
             ticketType: selectedTier,
             paymentStatus: 'PAID'
         };
-
         try {
             await api.post('/registrations', bookingData);
-            toast.success('RESERVATION_CONFIRMED', {
+            toast.success('RESERVATION CONFIRMED', {
                 description: `Your ${selectedTier} ticket is secured for ${event.title}.`,
                 style: {
                     background: '#000',

@@ -1,8 +1,8 @@
-// components/DiscussionForum.jsx
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { MessageSquare, Send, AlertCircle } from 'lucide-react';
 import api from '../../api/api';
+import { toast } from 'sonner';
 
 const DiscussionForum = ({ eventId }) => {
     const { user } = useUser();
@@ -34,7 +34,10 @@ const DiscussionForum = ({ eventId }) => {
         try {
             const res = await api.get(`/events/${eventId}/discussions`);
             setPosts(res.data);
-        } catch (err) { console.error("Forum fetch error", err); }
+        } catch (err) { 
+            console.error("Forum fetch error", err);
+            toast.error("Erro fetching posts")
+        }
     };
 
     const handlePost = async () => {
@@ -51,7 +54,7 @@ const DiscussionForum = ({ eventId }) => {
             fetchPosts(); 
         } catch (err) {
             console.error("Post failed", err.response?.data);
-            alert("Database rejected the message. Check if User Sync worked.");
+            toast.error("Database rejected the message. Check if User Sync worked.");
         }
     };
 

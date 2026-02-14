@@ -26,6 +26,7 @@ app.get('/api/health', (req, res) => {
     res.json({ status: "Backend is running", timestamp: new Date() });
 });
 
+// Sync user to database for dicussion
 app.post('/api/users/sync', async (req, res) => {
     const { clerkId, fullName, email, profileImageUrl } = req.body;
     try {
@@ -48,8 +49,7 @@ app.get("/api/events", async (req, res) => {
             SELECT * FROM events 
             WHERE dateTime >= datetime('now', 'localtime') 
             ORDER BY dateTime ASC
-        `);
-        
+        `);        
         res.json(events);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -70,7 +70,6 @@ app.get('/api/manager/events/:managerId', async (req, res) => {
             WHERE e.managerId = ?
             GROUP BY e.id
         `, [managerId]);
-        
         res.json(events);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -96,7 +95,7 @@ app.get('/api/events/:id/attendees', async (req, res) => {
     res.json(attendees);
 });
 
-// Get Event Details for Booking Page
+// Get Event Details for Control Pannel
 app.get('/api/events/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -177,12 +176,10 @@ app.get('/api/events/:id/discussions', async (req, res) => {
     }
 });
 
-// backend/src/index.js
+// Send broadcast message
 app.post('/api/engagement', async (req, res) => {
-    const { eventId, userId, type, content } = req.body;
-    
-    // Check if data is arriving
-    console.log("📥 Received Message:", { eventId, userId, content });
+    const { eventId, userId, type, content } = req.body;    
+    console.log("Received Message:", { eventId, userId, content });
 
     try {
         const result = await db.run(
@@ -191,8 +188,7 @@ app.post('/api/engagement', async (req, res) => {
         );
         res.status(201).json({ id: result.lastID, message: "Post shared" });
     } catch (err) {
-        // This will print the EXACT reason (e.g., "FOREIGN KEY constraint failed")
-        console.error("SQL ERROR:", err.message);
+        console.error("Server ERROR:", err.message);
         res.status(500).json({ error: err.message });
     }
 });
@@ -233,7 +229,7 @@ app.post('/api/events/:id/broadcast', async (req, res) => {
                     <p>${message}</p>
                     <hr />
                     <small>Sent by your Event Organizer</small>
-                   </div>`
+                </div>`
         });
 
         res.json({ message: "Broadcast sent successfully!" });
@@ -264,7 +260,7 @@ app.delete("/api/events/:id", async (req, res) => {
 
         // 3. Delete the actual event
         await db.run("DELETE FROM events WHERE id = ?", [id]);
-        console.log(`🗑️ Successfully deleted event: ${id}`);
+        console.log(`Successfully deleted event: ${id}`);
         
         res.status(200).json({ 
             success: true, 
