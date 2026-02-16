@@ -1,67 +1,72 @@
-const express = require('express');
-const cors = require('cors');
-const setupDb = require('./database');
-const { v4: uuidv4 } = require('uuid');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const setupDb = require("./database");
+const { v4: uuidv4 } = require("uuid");
+require("dotenv").config();
 
 const app = express();
 
 // CORS configuration for local and production
-const allowedOrigins = ['http://localhost:5173', 'https://evently-yebc.onrender.com'];
-app.use(cors({
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://evently-yebc.onrender.com",
+];
+app.use(
+  cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) callback(null, true);
-        else callback(new Error('Not allowed by CORS'));
-    }
-}));
-
+      if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+      else callback(new Error("Not allowed by CORS"));
+    },
+  }),
+);
 
 app.use(express.json());
 
 let db;
-setupDb().then(database => db = database);
+setupDb().then((database) => (db = database));
 
 // --- ROUTES ---
-app.get('/api/health', (req, res) => {
-    res.json({ status: "Backend is running", timestamp: new Date() });
+app.get("/api/health", (req, res) => {
+  res.json({ status: "Backend is running", timestamp: new Date() });
 });
 
 // Sync user to database for dicussion
-app.post('/api/users/sync', async (req, res) => {
-    const { clerkId, fullName, email, profileImageUrl } = req.body;
-    try {
-        await db.run(
-            `INSERT OR REPLACE INTO users (clerkId, fullName, email, profileImageUrl) 
+app.post("/api/users/sync", async (req, res) => {
+  const { clerkId, fullName, email, profileImageUrl } = req.body;
+  try {
+    await db.run(
+      `INSERT OR REPLACE INTO users (clerkId, fullName, email, profileImageUrl) 
              VALUES (?, ?, ?, ?)`,
-            [clerkId, fullName, email, profileImageUrl]
-        );
-        res.status(200).json({ message: "User profile synchronized" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+      [clerkId, fullName, email, profileImageUrl],
+    );
+    res.status(200).json({ message: "User profile synchronized" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // 1. Fetch ALL events (For Discovery/Home)
 app.get("/api/events", async (req, res) => {
-    try {
-        // Fetch future events and sort by date and time
-        const events = await db.all(`
+  try {
+    // Fetch future events and sort by date and time
+    const events = await db.all(`
             SELECT * FROM events 
             WHERE dateTime >= datetime('now', 'localtime') 
             ORDER BY dateTime ASC
-        `);        
-        res.json(events);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+        `);
+    res.json(events);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Fetch All the events for mangers Dashboard
-app.get('/api/manager/events/:managerId', async (req, res) => {
-    const { managerId } = req.params;
-    try {
-        // This query counts registrations for each event automatically
-        const events = await db.all(`
+app.get("/api/manager/events/:managerId", async (req, res) => {
+  const { managerId } = req.params;
+  try {
+    // This query counts registrations for each event automatically
+    const events = await db.all(
+      `
             SELECT 
                 e.*, 
                 COUNT(r.id) AS totalBookings 
@@ -69,37 +74,63 @@ app.get('/api/manager/events/:managerId', async (req, res) => {
             LEFT JOIN registrations r ON e.id = r.eventId
             WHERE e.managerId = ?
             GROUP BY e.id
-        `, [managerId]);
-        res.json(events);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+        `,
+      [managerId],
+    );
+    res.json(events);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Create Event
-app.post('/api/events', async (req, res) => {
-    const { managerId, title, description, location, dateTime, privacy, silver, gold, diamond } = req.body;
-    const id = uuidv4();
-    await db.run(
-        `INSERT INTO events (id, managerId, title, description, location, dateTime, privacy, silver_price, gold_price, diamond_price) 
+app.post("/api/events", async (req, res) => {
+  const {
+    managerId,
+    title,
+    description,
+    location,
+    dateTime,
+    privacy,
+    silver,
+    gold,
+    diamond,
+  } = req.body;
+  const id = uuidv4();
+  await db.run(
+    `INSERT INTO events (id, managerId, title, description, location, dateTime, privacy, silver_price, gold_price, diamond_price) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [id, managerId, title, description, location, dateTime, privacy, silver, gold, diamond]
-    );
-    res.status(201).json({ id, message: "Event Created" });
+    [
+      id,
+      managerId,
+      title,
+      description,
+      location,
+      dateTime,
+      privacy,
+      silver,
+      gold,
+      diamond,
+    ],
+  );
+  res.status(201).json({ id, message: "Event Created" });
 });
 
 // Fetch Attendee List for specific Event
-app.get('/api/events/:id/attendees', async (req, res) => {
-    const { id } = req.params;
-    const attendees = await db.all('SELECT * FROM registrations WHERE eventId = ?', [id]);
-    res.json(attendees);
+app.get("/api/events/:id/attendees", async (req, res) => {
+  const { id } = req.params;
+  const attendees = await db.all(
+    "SELECT * FROM registrations WHERE eventId = ?",
+    [id],
+  );
+  res.json(attendees);
 });
 
 // Get Event Details for Control Pannel
-app.get('/api/events/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        const query = `
+app.get("/api/events/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const query = `
             SELECT 
                 e.*,
                 COUNT(r.id) AS totalAttendees,
@@ -114,50 +145,50 @@ app.get('/api/events/:id', async (req, res) => {
             WHERE e.id = ?
             GROUP BY e.id
         `;
-        const event = await db.get(query, [id]);
-        if (!event) {
-            return res.status(404).json({ error: "Event not found" });
-        }
-        // Handle null revenue for events with 0 bookings
-        event.accumulatedRevenue = event.accumulatedRevenue || 0;
-        res.json(event);
-    } catch (err) {
-        console.error("Database Error:", err.message);
-        res.status(500).json({ error: "Failed to fetch event metrics" });
+    const event = await db.get(query, [id]);
+    if (!event) {
+      return res.status(404).json({ error: "Event not found" });
     }
+    // Handle null revenue for events with 0 bookings
+    event.accumulatedRevenue = event.accumulatedRevenue || 0;
+    res.json(event);
+  } catch (err) {
+    console.error("Database Error:", err.message);
+    res.status(500).json({ error: "Failed to fetch event metrics" });
+  }
 });
 
 // Update Event (For Manager's Control Panel)
-app.put('/api/events/:id', async (req, res) => {
-    const { title, location, description, dateTime } = req.body;
-    await db.run(
-        'UPDATE events SET title = ?, location = ?, description = ?, dateTime = ? WHERE id = ?',
-        [title, location, description, dateTime, req.params.id]
-    );
-    res.json({ message: "Updated" });
+app.put("/api/events/:id", async (req, res) => {
+  const { title, location, description, dateTime } = req.body;
+  await db.run(
+    "UPDATE events SET title = ?, location = ?, description = ?, dateTime = ? WHERE id = ?",
+    [title, location, description, dateTime, req.params.id],
+  );
+  res.json({ message: "Updated" });
 });
 
 // Registration Endpoint
-app.post('/api/registrations', async (req, res) => {
-    const { eventId, userId, userName, userEmail, ticketType, paymentStatus } = req.body;
-    try {
-        await db.run(
-            `INSERT INTO registrations (eventId, userId, userName, userEmail, ticketType, paymentStatus) 
+app.post("/api/registrations", async (req, res) => {
+  const { eventId, userId, userName, userEmail, ticketType, paymentStatus } =
+    req.body;
+  try {
+    await db.run(
+      `INSERT INTO registrations (eventId, userId, userName, userEmail, ticketType, paymentStatus) 
              VALUES (?, ?, ?, ?, ?, ?)`,
-            [eventId, userId, userName, userEmail, ticketType, paymentStatus]
-        );
-        res.status(201).json({ message: "Registration Successful" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+      [eventId, userId, userName, userEmail, ticketType, paymentStatus],
+    );
+    res.status(201).json({ message: "Registration Successful" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-
-//  Discussion Forum Endpoint
-app.get('/api/events/:id/discussions', async (req, res) => {
-    try {
-        const posts = await db.all(
-            `SELECT 
+//  Discussion Endpoint
+app.get("/api/events/:id/discussions", async (req, res) => {
+  try {
+    const posts = await db.all(
+      `SELECT 
                 d.id, 
                 d.content, 
                 d.timestamp, 
@@ -166,115 +197,167 @@ app.get('/api/events/:id/discussions', async (req, res) => {
              FROM engagement d 
              JOIN users u ON d.userId = u.clerkId 
              WHERE d.eventId = ? 
-             ORDER BY d.timestamp ASC`, 
-            [req.params.id]
-        );
-        res.json(posts);
-    } catch (err) {
-        console.error("SQL Error:", err.message);
-        res.status(500).json({ error: "Could not fetch discussions" });
-    }
+             ORDER BY d.timestamp ASC`,
+      [req.params.id],
+    );
+    res.json(posts);
+  } catch (err) {
+    console.error("SQL Error:", err.message);
+    res.status(500).json({ error: "Could not fetch discussions" });
+  }
 });
 
 // Send broadcast message
-app.post('/api/engagement', async (req, res) => {
-    const { eventId, userId, type, content } = req.body;    
-    console.log("Received Message:", { eventId, userId, content });
+app.post("/api/engagement", async (req, res) => {
+  const { eventId, userId, type, content } = req.body;
+  console.log("Received Message:", { eventId, userId, content });
 
-    try {
-        const result = await db.run(
-            'INSERT INTO engagement (eventId, userId, type, content) VALUES (?, ?, ?, ?)',
-            [eventId, userId, type, content]
-        );
-        res.status(201).json({ id: result.lastID, message: "Post shared" });
-    } catch (err) {
-        console.error("Server ERROR:", err.message);
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const result = await db.run(
+      "INSERT INTO engagement (eventId, userId, type, content) VALUES (?, ?, ?, ?)",
+      [eventId, userId, type, content],
+    );
+    res.status(201).json({ id: result.lastID, message: "Post shared" });
+  } catch (err) {
+    console.error("Server ERROR:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-
 // nodemailer setup (for broadcasting messages to attendees)
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
 // Broadcast Route
-app.post('/api/events/:id/broadcast', async (req, res) => {
-    const { id } = req.params;
-    const { message, eventTitle } = req.body;
+app.post("/api/events/:id/broadcast", async (req, res) => {
+  const { id } = req.params;
+  const { message, eventTitle } = req.body;
 
-    try {
-        // Fetch all registered emails for this event
-        const attendees = await db.all('SELECT userEmail FROM registrations WHERE eventId = ?', [id]);
-        const event = await db.get('SELECT * FROM events WHERE id = ?', [req.params.id]);
-        const emailList = attendees.map(a => a.userEmail).join(',');
+  try {
+    // Fetch all registered emails for this event
+    const attendees = await db.all(
+      "SELECT userEmail FROM registrations WHERE eventId = ?",
+      [id],
+    );
+    const event = await db.get("SELECT * FROM events WHERE id = ?", [
+      req.params.id,
+    ]);
+    const emailList = attendees.map((a) => a.userEmail).join(",");
 
-        if (!emailList) return res.status(404).json({ error: "No attendees found" });
+    if (!emailList)
+      return res.status(404).json({ error: "No attendees found" });
 
-        // Send the Email
-        await transporter.sendMail({
-            from: '"Event Manager" <your-email@gmail.com>',
-            to: emailList, 
-            subject: `Update for ${event.title}`,
-            text: message,
-            html: `<div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
+    // Send the Email
+    await transporter.sendMail({
+      from: '"Event Manager" <your-email@gmail.com>',
+      to: emailList,
+      subject: `Update for ${event.title}`,
+      text: message,
+      html: `<div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
                     <h2>${event.title}</h2>
                     <p>${message}</p>
                     <hr />
                     <small>Sent by your Event Organizer</small>
-                </div>`
-        });
+                </div>`,
+    });
 
-        res.json({ message: "Broadcast sent successfully!" });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Failed to send broadcast" });
-    }
+    res.json({ message: "Broadcast sent successfully!" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to send broadcast" });
+  }
 });
-
 
 // DELETE an event by ID
 app.delete("/api/events/:id", async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
+  try {
+    // 1. Check if the event exists
+    const event = await db.get("SELECT * FROM events WHERE id = ?", [id]);
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+    // 2. Delete associated registrations first (to prevent orphan data)
+    await db.run("DELETE FROM registrations WHERE eventId = ?", [id]);
+    // 3. Delete the actual event
+    await db.run("DELETE FROM events WHERE id = ?", [id]);
+    console.log(`Successfully deleted event: ${id}`);
+
+    res.status(200).json({
+      success: true,
+      message: "Event and all associated bookings deleted.",
+    });
+  } catch (err) {
+    console.error("Database Delete Error:", err.message);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error during deletion.",
+    });
+  }
+});
+
+// Get all registered events by user
+app.get("/api/registrations/user/:userId", async (req, res) => {
+    const { userId } = req.params;
 
     try {
-        // 1. Check if the event exists
-        const event = await db.get("SELECT * FROM events WHERE id = ?", [id]);
-        
-        if (!event) {
-            return res.status(404).json({ 
-                success: false, 
-                message: "Event not found" 
-            });
+        const userBookings = await db.all(
+            `
+            SELECT 
+                r.id AS registrationId, 
+                e.title AS eventTitle,  
+                e.dateTime AS eventDate,
+                r.eventId
+            FROM registrations r
+            INNER JOIN events e ON r.eventId = e.id
+            WHERE r.userId = ?
+            ORDER BY r.id DESC
+            `,
+            [userId],
+        );
+
+        res.json(userBookings);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to fetch registrations" });
+    }
+});
+// DELETE: Cancel a booking
+app.delete("/api/registrations/:id", async (req, res) => {
+    const { id } = req.params; // The Registration ID from URL
+    const { userId } = req.body; // Sent in the request body from Clerk
+
+    try {
+        // 1. Verify the booking belongs to this specific user
+        const booking = await db.get(
+            "SELECT * FROM registrations WHERE id = ? AND userId = ?",
+            [id, userId]
+        );
+
+        if (!booking) {
+            return res.status(403).json({ error: "Unauthorized or booking not found" });
         }
 
-        // 2. Delete associated registrations first (to prevent orphan data)
-        await db.run("DELETE FROM registrations WHERE eventId = ?", [id]);
+        // 2. Perform the deletion
+        await db.run("DELETE FROM registrations WHERE id = ?", [id]);
 
-        // 3. Delete the actual event
-        await db.run("DELETE FROM events WHERE id = ?", [id]);
-        console.log(`Successfully deleted event: ${id}`);
-        
-        res.status(200).json({ 
-            success: true, 
-            message: "Event and all associated bookings deleted." 
-        });
-
+        res.json({ success: true, message: "Booking cancelled successfully" });
     } catch (err) {
-        console.error("Database Delete Error:", err.message);
-        res.status(500).json({ 
-            success: false, 
-            message: "Internal Server Error during deletion." 
-        });
+        console.error("Backend Error:", err);
+        res.status(500).json({ error: "Server error during cancellation" });
     }
 });
 
-const PORT = process.env.PORT||5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));

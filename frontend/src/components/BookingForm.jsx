@@ -6,6 +6,7 @@ import TierCard from '../components/TierCard';
 import DiscussionForum from '../components/Discussion';
 import { toast } from 'sonner';
 import api from '../../api/api';
+import CancelBooking from './CancelBooking';
 
 const BookingPage = () => {
     const { id } = useParams();
@@ -138,6 +139,7 @@ const BookingPage = () => {
                     <DiscussionForum eventId={id} />
                 </section>
             </div>
+            <CancelBooking/>
         </div>
     );
 };

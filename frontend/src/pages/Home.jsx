@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {  Zap,  } from 'lucide-react';
 import EventGrid from '../components/EventGrid';
+import MyBookings from '../components/MyBookings';
 
 const Home = () => {
     return (
@@ -21,6 +22,8 @@ const Home = () => {
             </section>
         
         <EventGrid/>
+                <MyBookings/>
+
         </div>
     );
 };

@@ -2,6 +2,7 @@ import React from 'react';
 import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/clerk-react";
 import { Link } from "react-router-dom";
 import { LayoutDashboard, Zap } from "lucide-react";
+import MyBookings from './MyBookings';
 
 export default function Navbar() {
     const { user } = useUser();
